@@ -33,6 +33,8 @@ int APS5_VABI sceHttpSetRedirectCallback(int, HttpRedirectCallback, void*);
 int APS5_VABI sceHttpSetCookieRecvCallback(int, HttpCookieRecvCallback, void*);
 int APS5_VABI sceHttpSetAuthInfoCallback(int, HttpAuthInfoCallback, void*);
 int APS5_VABI sceHttpParseStatusLine(const char*, std::size_t, std::int32_t*, std::int32_t*, std::int32_t*, const char**, std::size_t*);
+int APS5_VABI sceHttpSetCookieEnabled(int, int);
+int APS5_VABI sceHttpAbortWaitRequest(void);
 }
 
 static void Require(bool value) { if (!value) std::abort(); }
@@ -205,10 +207,12 @@ int main() {
     HttpNBEvent events[2]{};
     Require(sceHttpWaitRequest(epoll, events, 2, 0) == 0);
     Require(sceHttpWaitRequest(epoll, events, 2, 1000) == 0);
+    Require(sceHttpWaitRequest(epoll, events, 2, -1) == 0);
     Require(sceHttpWaitRequest(epoll, nullptr, 2, 0) == invalidValue);
     Require(sceHttpWaitRequest(epoll, events, 0, 0) == invalidValue);
     Require(sceHttpWaitRequest(nullptr, events, 2, 0) == invalidValue);
     Require(sceHttpDestroyEpoll(1, epoll) == 0);
+    Require(sceHttpAbortWaitRequest() == 0);
 
     char data[16];
     Require(sceHttpReadData(1, data, sizeof(data)) == network);
@@ -218,6 +222,10 @@ int main() {
     Require(sceHttpSetInflateGZIPEnabled(1, 1) == 0);
     Require(sceHttpSetInflateGZIPEnabled(1, 2) == invalidValue);
     Require(sceHttpSetInflateGZIPEnabled(1, -1) == invalidValue);
+    Require(sceHttpSetCookieEnabled(1, 0) == 0);
+    Require(sceHttpSetCookieEnabled(1, 1) == 0);
+    Require(sceHttpSetCookieEnabled(1, 2) == invalidValue);
+    Require(sceHttpSetCookieEnabled(1, -1) == invalidValue);
     Require(sceHttpsEnableOption(1, 0) == 0);
     Require(sceHttpsLoadCert(1, 0, nullptr, nullptr, nullptr) == 0);
     Require(sceHttpsUnloadCert(1) == 0);
