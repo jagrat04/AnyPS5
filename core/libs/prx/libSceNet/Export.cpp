@@ -2287,8 +2287,9 @@ int APS5_VABI sceNetSetDnsInfo(const NetDnsInfo* info, std::uint32_t flags) {
 }
 
 int APS5_VABI sceNetShowIfconfigWithMemory(std::int32_t poolId) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
+    std::lock_guard lk(g_mutex);
+    if (g_pools.find(poolId) == g_pools.end()) return fail(NET_EBADF);
+    throw std::runtime_error(__func__);
 }
 
 int APS5_VABI sceNetShowPolicy(void) {
