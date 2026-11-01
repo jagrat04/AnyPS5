@@ -76,10 +76,6 @@ int APS5_VABI curl_multi_socket_all() {
     NotImplemented_nid_no_patch(__func__);
 }
 
-int APS5_VABI curl_strequal() {
-    NotImplemented_nid_no_patch(__func__);
-}
-
 int APS5_VABI curl_url_get() {
     NotImplemented_nid_no_patch(__func__);
 }
@@ -157,10 +153,6 @@ int APS5_VABI curl_easy_strerror() {
 }
 
 int APS5_VABI curl_easy_init() {
-    NotImplemented_nid_no_patch(__func__);
-}
-
-int APS5_VABI curl_strnequal() {
     NotImplemented_nid_no_patch(__func__);
 }
 
