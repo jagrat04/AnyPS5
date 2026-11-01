@@ -2,7 +2,7 @@
 
 ### Callable exports
 
-- [Callable exports](../../../core/libs/prx/libcairo/Export.cpp) - 161 callable NIDs match the [public 3.20 catalogue](https://github.com/DNNDHH/PS5-3.20_Libs/blob/b2a77c09cd71c01f34c790cfbe98c751a13262ad/libcairo.c) and the [selected export metadata](https://gist.github.com/kyon-eth/a0bb48f2b3070a5eac8a638810f195f2/a3838ac54ebcc0bbfeb3cc46002a9a2dcce4dbdc) from two version-labelled images (SHA-256 `ec2158e0c5875316d200037d7f4bc48861626451752523f6930d687307c75ef8`). The labels are not authenticated. Prototypes and behavior are unverified; these declarations throw through `NotImplemented_nid_no_patch` and implement no runtime functionality.
+- [Callable exports](../../../core/libs/prx/libcairo/Export.cpp) - 151 callable NIDs match the [public 3.20 catalogue](https://github.com/DNNDHH/PS5-3.20_Libs/blob/b2a77c09cd71c01f34c790cfbe98c751a13262ad/libcairo.c) and the [selected export metadata](https://gist.github.com/kyon-eth/a0bb48f2b3070a5eac8a638810f195f2/a3838ac54ebcc0bbfeb3cc46002a9a2dcce4dbdc) from two version-labelled images (SHA-256 `ec2158e0c5875316d200037d7f4bc48861626451752523f6930d687307c75ef8`). The labels are not authenticated. Prototypes and behavior are unverified; these declarations throw through `NotImplemented_nid_no_patch` and implement no runtime functionality.
 
 | Name | NID |
 | --- | --- |
@@ -167,3 +167,7 @@
 | `cairo_pattern_add_color_stop_rgba` | `xXWrbaaPNNg` |
 | `cairo_region_num_rectangles` | `xoe4ss9GmYc` |
 | `cairo_set_line_width` | `zwMGP3ASKMI` |
+
+### Functional
+
+- [`cairo_matrix` affine transformations](../../../core/libs/prx/libcairo/src/Matrix.cpp) implement 2D affine transformations (`cairo_matrix_init`, `cairo_matrix_init_identity`, `cairo_matrix_init_translate`, `cairo_matrix_translate`, `cairo_matrix_scale`, `cairo_matrix_rotate`, `cairo_matrix_invert`, `cairo_matrix_multiply`, `cairo_matrix_transform_distance`, `cairo_matrix_transform_point`) following standard Cairo semantics. Degenerate matrices return `CAIRO_STATUS_INVALID_MATRIX` on invert; null pointers throw `std::invalid_argument`.
