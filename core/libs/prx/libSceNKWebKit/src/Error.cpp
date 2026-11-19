@@ -20,7 +20,7 @@ int APS5_VABI WKErrorGetErrorCode(const void* errorRef) {
 
 const void* APS5_VABI WKErrorCopyFailingURL(const void* errorRef) {
     const auto* error = NKWebKit::Cast<NKWebKit::Error>(errorRef, __func__);
-    if (!error->failingURL || error->failingURL->text.empty())
+    if (!error->failingURL)
         return nullptr;
     return NKWebKit::ToRef(NKWebKit::Retained<NKWebKit::URL>::Share(error->failingURL.Get()));
 }
