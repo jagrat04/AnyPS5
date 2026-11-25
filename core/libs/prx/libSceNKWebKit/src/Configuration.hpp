@@ -1,5 +1,6 @@
 #pragma once
 
+#include "prx/libSceNKWebKit/src/BackForwardList.hpp"
 #include "prx/libSceNKWebKit/src/Object.hpp"
 #include "prx/libSceNKWebKit/src/Preferences.hpp"
 #include "prx/libSceNKWebKit/src/Types.hpp"
@@ -40,6 +41,8 @@ class Page : public ObjectOf<ObjectType::Page> {
 public:
     bool canGoBack = false;
     bool canGoForward = false;
+    bool isLoading = false;
+    mutable Retained<BackForwardList> backForwardList;
     mutable Retained<Inspector> inspector;
     bool suppressScrollbarAnimations = false;
     bool hasHorizontalScrollbar = false;
