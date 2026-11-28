@@ -1,4 +1,5 @@
 #include "prx/libc/include/general/VabiMacros.hpp"
+#include "prx/libSceNKWebKit/include/FieldGettersExports.hpp"
 #include "prx/libSceNKWebKit/include/WebKitConfigExports.hpp"
 #include "prx/libSceNKWebKit/include/WebKitValueExports.hpp"
 #include "prx/libSceNKWebKit/src/Configuration.hpp"
@@ -71,12 +72,20 @@ int main() {
     Require(view->popupMenuClient == nullptr);
     Require(view->lastPopupMenuSelectedIndex == -1);
 
+    const void* defaultPage = reinterpret_cast<const void*>(WKViewGetPage(viewRef));
+    Require(defaultPage != nullptr);
+    Require(WKGetTypeID(defaultPage) == static_cast<std::uint32_t>(NKWebKit::ObjectType::Page));
+
     const void* configRef = WKPageConfigurationCreate();
     Require(configRef != nullptr);
     const void* viewWithConfigRef = WKViewCreate(configRef);
     Require(viewWithConfigRef != nullptr);
     auto* viewWithConfig = NKWebKit::Cast<NKWebKit::View>(viewWithConfigRef, __func__);
     Require(viewWithConfig->configuration.Get() != nullptr);
+
+    const void* pageWithConfig = reinterpret_cast<const void*>(WKViewGetPage(viewWithConfigRef));
+    Require(pageWithConfig != nullptr);
+    Require(WKGetTypeID(pageWithConfig) == static_cast<std::uint32_t>(NKWebKit::ObjectType::Page));
 
     int dummyViewClient = 101;
     WKViewSetViewClient(viewRef, &dummyViewClient);
@@ -146,19 +155,33 @@ int main() {
     Require(spanningHoles[1].canvasHandle == 200);
 
     ProtectPage(pages + 4096, false);
-    copied = -1;
-    actual = -1;
+    copied = 42;
+    actual = 84;
     RequireThrows([&] { WKViewGetPunchHoles(viewRef, spanningHoles, 2, &copied, &actual); });
-    Require(copied == -1);
-    Require(actual == -1);
+    Require(copied == 42);
+    Require(actual == 84);
 
     auto* guardedCount = reinterpret_cast<int*>(pages + 4096);
+    copied = 42;
+    actual = 84;
     RequireThrows([&] { WKViewGetPunchHoles(viewRef, outHoles, 4, guardedCount, &actual); });
+    Require(actual == 84);
+
+    copied = 42;
+    actual = 84;
     RequireThrows([&] { WKViewGetPunchHoles(viewRef, outHoles, 4, &copied, guardedCount); });
+    Require(copied == 42);
 
     auto* badCount = reinterpret_cast<int*>(std::uintptr_t{0x10});
+    copied = 42;
+    actual = 84;
     RequireThrows([&] { WKViewGetPunchHoles(viewRef, outHoles, 4, badCount, &actual); });
+    Require(actual == 84);
+
+    copied = 42;
+    actual = 84;
     RequireThrows([&] { WKViewGetPunchHoles(viewRef, outHoles, 4, &copied, badCount); });
+    Require(copied == 42);
 
     UnmapTwoPages(pages);
 

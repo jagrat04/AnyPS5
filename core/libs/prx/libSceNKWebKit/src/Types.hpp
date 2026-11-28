@@ -591,6 +591,8 @@ public:
     bool isActive = false;
     bool isFocused = false;
     bool isVisible = false;
+    const void* page = nullptr;
+    Retained<Object> retainedPage;
     SizeValue size{ 0.0, 0.0 };
     Retained<Object> configuration;
     const void* viewClient = nullptr;

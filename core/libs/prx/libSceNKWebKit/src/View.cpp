@@ -11,14 +11,20 @@
 #include <string>
 #include <vector>
 
+static_assert(offsetof(NKWebKit::View, page) == 0x28);
+
 extern "C" {
 
 const void* APS5_VABI WKViewCreate(const void* pageConfigurationRef) {
     auto view = NKWebKit::Make<NKWebKit::View>();
+    auto page = NKWebKit::Make<NKWebKit::Page>();
     if (pageConfigurationRef) {
         auto* config = NKWebKit::Cast<NKWebKit::PageConfiguration>(pageConfigurationRef, __func__);
         view->configuration = NKWebKit::Retained<NKWebKit::Object>::Share(config);
+        page->configuration = NKWebKit::Retained<NKWebKit::PageConfiguration>::Share(config);
     }
+    view->page = page.Get();
+    view->retainedPage = NKWebKit::Retained<NKWebKit::Object>::Share(page.Get());
     return NKWebKit::ToRef(view);
 }
 
@@ -57,16 +63,37 @@ void APS5_VABI WKViewGetPunchHoles(const void* viewRef, WKPunchHole* holes, int 
         if (static_cast<std::size_t>(copied) > std::numeric_limits<std::size_t>::max() / sizeof(WKPunchHole)) {
             throw std::overflow_error(std::string(__func__) + ": array byte size overflow");
         }
-        const std::size_t bytes = static_cast<std::size_t>(copied) * sizeof(WKPunchHole);
-        if (!GuestCopyOut_nid_no_patch(holes, stagedHoles.data(), bytes)) {
-            throw std::invalid_argument(std::string(__func__) + ": unwritable holes destination");
-        }
     }
-    if (!GuestCopyOut_nid_no_patch(numberOfCopiedPunchHoles, &copied, sizeof(copied))) {
-        throw std::invalid_argument(std::string(__func__) + ": unwritable numberOfCopiedPunchHoles destination");
+    int originalActual = 0;
+    bool hadOriginalActual = GuestCopyIn_nid_no_patch(&originalActual, numberOfActualPunchHoles, sizeof(originalActual));
+    int originalCopied = 0;
+    bool hadOriginalCopied = GuestCopyIn_nid_no_patch(&originalCopied, numberOfCopiedPunchHoles, sizeof(originalCopied));
+    const std::size_t bytes = static_cast<std::size_t>(copied) * sizeof(WKPunchHole);
+    std::vector<WKPunchHole> originalHoles(copied);
+    bool hadOriginalHoles = false;
+    if (copied > 0) {
+        hadOriginalHoles = GuestCopyIn_nid_no_patch(originalHoles.data(), holes, bytes);
     }
+
     if (!GuestCopyOut_nid_no_patch(numberOfActualPunchHoles, &actual, sizeof(actual))) {
         throw std::invalid_argument(std::string(__func__) + ": unwritable numberOfActualPunchHoles destination");
+    }
+    if (!GuestCopyOut_nid_no_patch(numberOfCopiedPunchHoles, &copied, sizeof(copied))) {
+        if (hadOriginalActual) {
+            GuestCopyOut_nid_no_patch(numberOfActualPunchHoles, &originalActual, sizeof(originalActual));
+        }
+        throw std::invalid_argument(std::string(__func__) + ": unwritable numberOfCopiedPunchHoles destination");
+    }
+    if (copied > 0) {
+        if (!GuestCopyOut_nid_no_patch(holes, stagedHoles.data(), bytes)) {
+            if (hadOriginalActual) {
+                GuestCopyOut_nid_no_patch(numberOfActualPunchHoles, &originalActual, sizeof(originalActual));
+            }
+            if (hadOriginalCopied) {
+                GuestCopyOut_nid_no_patch(numberOfCopiedPunchHoles, &originalCopied, sizeof(originalCopied));
+            }
+            throw std::invalid_argument(std::string(__func__) + ": unwritable holes destination");
+        }
     }
 }
 
